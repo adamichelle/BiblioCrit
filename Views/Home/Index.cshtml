@@ -1,0 +1,72 @@
+﻿@model OcrModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="row pt-5">
+    <div class="col-md-7">
+        <div class="file-upload p-2">
+            <button class="file-upload-btn btn btn-success btn-lg btn-block" type="button" onclick="$('.file-upload-input').trigger( 'click' )">Select Book Cover / Title Page Image</button>
+
+            <div class="image-upload-wrap">
+                <input class="file-upload-input" type='file' onchange="readURL(this);" accept="image/*" />
+                <div class="drag-text">
+                    <h3>Drag and drop a file or select Select Book Cover / Title Page Image</h3>
+                </div>
+            </div>
+            <div class="file-upload-content mt-2">
+                <div id="image_input">
+                </div>
+                <div class="image-title-wrap mt-2">
+                    <button type="button" onclick="removeUpload()" class="remove-image btn btn-danger btn-lg btn-block">Remove <span class="image-title">Uploaded Image</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 offset-md-1">
+        <div class="file-upload-content-crop-preview mt-4">
+            <img id="image_output" src="#" />
+        </div>
+        <form method="post" enctype="multipart/form-data" asp-action="GetImageText">
+            <input type="hidden" id="CroppedImage" asp-for="@Model.CroppedImage" />
+            <input type="hidden" id="DestinationLanguage" value="eng" asp-for="@Model.DestinationLanguage" />
+            <button type="submit" class="mt-2 text-center get-reviews btn btn-success btn-lg">Get Reviews</button>
+        </form>
+    </div>
+</div>
+<div class="container">
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $('#target').Jcrop({
+                aspectRatio: 0,
+                onChange: updateCoords,
+                onSelect: updateCoords
+            });
+
+            function updateCoords(c) {
+                $('#x').val(c.x);
+                $('#y').val(c.y);
+                $('#w').val(c.w);
+                $('#h').val(c.h);
+                $('#x2').val(c.x2);
+                $('#y2').val(c.y2);
+                var rx = 200 / c.w; // 200 - preview box size
+                var ry = 200 / c.h;
+                $('#preview').css({
+                    width: Math.round(rx * 800) + 'px',
+                    height: Math.round(ry * 600) + 'px',
+                    marginLeft: '-' + Math.round(rx * c.x) + 'px',
+                    marginTop: '-' + Math.round(ry * c.y) + 'px'
+                });
+            };
+
+        });
+    </script>
+}

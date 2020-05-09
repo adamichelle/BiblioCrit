@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Get Reviews";
+}
+
+<h1>GoodReads Reviews</h1>
+@if (ViewBag.ImageText == "Unreadable image text")
+{
+    <p class="col-12">Unable to detect text in image. Please try again using another photo</p>
+    <a asp-action="Index" class="btn btn-info">Return to home page</a>
+}
+else
+{
+    <div class="row">
+        <div id="loader"></div>
+        <div id="noReviews" class="col-lg-12"></div>
+        <div class="col-lg-12" id="reviewsContainer" style="display: none">
+            <h2 id="bookTitle"></h2>
+            <div data-imagetext="@ViewBag.ImageText" id="reviews" class="embed-responsive embed-responsive-21by9"></div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            const APIKEY = "@ViewBag.GoodReadsAPIKey";
+
+            const searchText = $("#reviews").data('imagetext');
+
+            const searchUrl = "https://ada-cors-proxy-server.herokuapp.com/https://www.goodreads.com/book/title.xml?title=" + searchText;
+
+            $.ajax({
+                url: searchUrl,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                data: { "key": APIKEY },
+                dataType: "xml",
+                success: function (data) {
+                    const reviewsWidgetNode = data.getElementsByTagName('reviews_widget')[0];
+                    const reviewsWidget = reviewsWidgetNode.textContent;
+                    $("#loader").hide();
+                    $("#reviewsContainer").show();
+                    $("#reviews").html(reviewsWidget);
+                    $("#the_iframe").addClass("embed-responsive-item");
+
+                    const bookTitleUrl = $("#gr_header h1 a");
+                    $("#bookTitle").append(bookTitleUrl);
+
+                    const footerAttribution = $("#gr_footer");
+                    $("#reviewsContainer").append(footerAttribution);
+                },
+                error: function (xhr, status, error) {
+                    $("#loader").hide();
+                    $("#noReviews").html("<p>No reviews for this book title.</p>");
+                }
+            });
+        });
+
+    </script>
+}
